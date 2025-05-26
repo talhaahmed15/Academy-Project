@@ -118,7 +118,7 @@ class UploadQuizMarks extends StatelessWidget {
                     return const CustomErrorWidget2();
                   } else {
                     if (state.studentsList.isEmpty) {
-                      return const CustomErrorWidget();
+                      return CustomErrorWidget();
                     }
 
                     for (int i = 0; i < state.studentsList.length; i++) {

@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 
 class CustomErrorWidget extends StatelessWidget {
   const CustomErrorWidget({
+    this.text = "It looks like there are no students yet",
     super.key,
   });
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +21,9 @@ class CustomErrorWidget extends StatelessWidget {
           color: CustomTheme().selectedTextColor,
           height: 150,
         ),
-        const Text(
-          "It looks like there are no students yet.",
-          style: TextStyle(
+        Text(
+          text,
+          style: const TextStyle(
               fontWeight: FontWeight.bold, fontFamily: 'Mulish', fontSize: 16),
         ),
       ],

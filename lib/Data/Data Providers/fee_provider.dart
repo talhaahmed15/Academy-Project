@@ -9,26 +9,38 @@ class FeeProvider {
   String _getFormattedMonth(DateTime date) =>
       DateFormat('MMM-yyyy').format(date);
 
-  Future<bool> checkAndCopyPreviousMonthData() async {
+  Future<bool> checkAndCopyLatestAvailableData() async {
     DateTime now = DateTime.now();
     String currentMonth = _getFormattedMonth(now);
-    String previousMonth =
-        _getFormattedMonth(DateTime(now.year, now.month - 1, now.day));
 
     try {
+      final snapshot = await _firestore.collection("FeeStatus").get();
+      List<String> allMonths = snapshot.docs
+          .map((doc) => doc.id)
+          .where((id) => id.compareTo(currentMonth) < 0)
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
+
+      if (allMonths.isEmpty) {
+        print("No previous data found.");
+        return false;
+      }
+
+      String latestAvailableMonth = allMonths.first;
+
       final previousSnapshot = await _firestore
           .collection("FeeStatus")
-          .doc(previousMonth)
+          .doc(latestAvailableMonth)
           .get()
           .timeout(const Duration(seconds: 10));
 
       if (previousSnapshot.exists) {
         final previousData = previousSnapshot.data() as Map<String, dynamic>;
-        print(previousData.length);
+        print("Found data from: $latestAvailableMonth");
 
         final updatedData = previousData.map((key, value) {
-          print(value);
           value['isFeesPaid'] = false;
+          value['feeDate'] = Timestamp.fromDate(now); // ✅ Add new feeDate
           return MapEntry(key, value);
         });
 
@@ -39,16 +51,15 @@ class FeeProvider {
 
         return true;
       } else {
-        print("Previous month data doesn't exist.");
+        print("Latest data doc exists but has no data.");
         return false;
       }
     } catch (e) {
-      print("Error checking previous month data: $e");
+      print("Error checking previous data: $e");
       throw Exception("$e");
     }
   }
 
-  // ✅ Fetch current month's fee status; if not available, copy from previous month
   Future<List<FeeModel>> fetchFeeStatus() async {
     try {
       String currentMonth = _getFormattedMonth(DateTime.now());
@@ -60,8 +71,7 @@ class FeeProvider {
           .timeout(const Duration(seconds: 10));
 
       if (!snapshot.exists) {
-        bool created = await checkAndCopyPreviousMonthData();
-
+        bool created = await checkAndCopyLatestAvailableData();
         if (!created)
           return [];
         else {
@@ -82,11 +92,12 @@ class FeeProvider {
           classNo: student['classNo'] ?? 'N/A',
           isFeesPaid: student['isFeesPaid'] ?? false,
           amount: student['amount'] ?? 0,
+          feeDate: (student['feeDate'] as Timestamp?)?.toDate() ??
+              DateTime.now(), // ✅ Handle date
         );
       }).toList();
     } catch (e) {
       print("Error fetching fee status: $e");
-
       throw Exception("$e");
     }
   }
@@ -97,16 +108,11 @@ class FeeProvider {
       DocumentReference feeRef =
           FirebaseFirestore.instance.collection('FeeStatus').doc(currentMonth);
 
-      // Convert the list of FeeModel into a map with student IDs as keys
       Map<String, dynamic> feeData = {
         for (var feeModel in feeStatusList) feeModel.id: feeModel.toMap(),
       };
 
-      // Update the entire document with the new fee data
-      await feeRef.set(
-          feeData,
-          SetOptions(
-              merge: true)); // merge:true to avoid overwriting other fields
+      await feeRef.set(feeData, SetOptions(merge: true));
     } catch (e) {
       throw Exception("Error saving fee status: $e");
     }

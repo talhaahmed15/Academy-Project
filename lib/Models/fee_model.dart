@@ -6,20 +6,22 @@ class FeeModel {
   bool isFeesPaid;
   int amount;
   String classNo;
-  bool isChanged; // New property to track changes
+  bool isChanged;
+  DateTime feeDate; // New property
 
-  FeeModel(
-      {required this.id,
-      required this.studentName,
-      required this.isFeesPaid,
-      required this.amount,
-      this.isChanged = false, // Default is false
-
-      required this.classNo});
+  FeeModel({
+    required this.id,
+    required this.studentName,
+    required this.isFeesPaid,
+    required this.amount,
+    required this.classNo,
+    required this.feeDate, // Initialize in constructor
+    this.isChanged = false,
+  });
 
   void toggleStatus() {
     isFeesPaid = !isFeesPaid;
-    isChanged = true; // Mark it as changed
+    isChanged = true;
   }
 
   Map<String, dynamic> toMap() {
@@ -27,6 +29,9 @@ class FeeModel {
       'studentName': studentName,
       'classNo': classNo,
       'isFeesPaid': isFeesPaid,
+      'amount': amount,
+      'feeDate': Timestamp.fromDate(
+          feeDate), // Convert DateTime to Firestore Timestamp
     };
   }
 
@@ -37,16 +42,19 @@ class FeeModel {
       isFeesPaid: data['isFeesPaid'] ?? false,
       amount: data['amount'] ?? 0,
       classNo: data['classNo'] ?? 'N/A',
+      feeDate: (data['feeDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
   factory FeeModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return FeeModel(
-      id: doc["studentId"],
-      studentName: doc['studentName'],
-      isFeesPaid: doc['isFeesPaid'] ?? false,
-      amount: doc['amount'],
-      classNo: doc['classNo'],
+      id: data['studentId'] ?? doc.id,
+      studentName: data['studentName'] ?? 'N/A',
+      isFeesPaid: data['isFeesPaid'] ?? false,
+      amount: data['amount'] ?? 0,
+      classNo: data['classNo'] ?? 'N/A',
+      feeDate: (data['feeDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 }

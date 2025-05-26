@@ -91,7 +91,7 @@ class _ManageStudentState extends State<ManageStudent> {
           } else if (state is StudentState) {
             // print("Ithey");
             if (studentBloc.state.studentsList.isEmpty) {
-              return const CustomErrorWidget();
+              return CustomErrorWidget();
             } else {
               return Center(
                 child: ListView.builder(

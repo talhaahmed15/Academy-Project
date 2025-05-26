@@ -1,6 +1,7 @@
 import 'package:ahmed_academy/Models/fee_model.dart';
 import 'package:ahmed_academy/Settings/Widget/container_fee_detail.dart';
 import 'package:ahmed_academy/Settings/Widget/container_with_text.dart';
+import 'package:ahmed_academy/Settings/Widget/error_widget.dart';
 import 'package:ahmed_academy/Settings/config/push_navigation.dart';
 import 'package:ahmed_academy/Settings/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -50,14 +51,16 @@ class FeeStatusHistory extends StatelessWidget {
           ),
         ),
       ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: feeList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return FeeDetailCard(object: feeList[index]);
-          },
-        ),
-      ),
+      body: feeList.isEmpty
+          ? const CustomErrorWidget(
+              text: "Fee not marked for this month.",
+            )
+          : ListView.builder(
+              itemCount: feeList.length,
+              itemBuilder: (BuildContext context, int index) {
+                return FeeDetailCard(object: feeList[index]);
+              },
+            ),
     );
   }
 }

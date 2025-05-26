@@ -35,6 +35,10 @@ class _FeeStatusState extends State<FeeStatus> {
     super.dispose();
   }
 
+  String formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -163,7 +167,7 @@ class _FeeStatusState extends State<FeeStatus> {
               return const CustomErrorWidget2();
             } else if (state is FeeSuccess) {
               if (state.feeList == null || state.feeList!.isEmpty) {
-                return const CustomErrorWidget();
+                return CustomErrorWidget();
               }
 
               List<FeeModel> filteredList = selectedClass == "All"
@@ -234,18 +238,32 @@ class _FeeStatusState extends State<FeeStatus> {
                                     : () {},
                                 child: ContainerWithLead(
                                   text: filteredList[index].studentName,
-                                  leading: Text(
-                                    filteredList[index].isFeesPaid == false
-                                        ? "Unpaid"
-                                        : "Paid",
-                                    style: TextStyle(
-                                      fontFamily: 'Mulish',
-                                      fontWeight: FontWeight.bold,
-                                      color: filteredList[index].isFeesPaid ==
-                                              false
-                                          ? Colors.red
-                                          : Colors.green,
-                                    ),
+                                  leading: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        filteredList[index].isFeesPaid
+                                            ? "Paid"
+                                            : "Unpaid",
+                                        style: TextStyle(
+                                          fontFamily: 'Mulish',
+                                          fontWeight: FontWeight.bold,
+                                          color: filteredList[index].isFeesPaid
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                      ),
+                                      if (filteredList[index].isFeesPaid)
+                                        Text(
+                                          "on ${formatDate(filteredList[index].feeDate)}",
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54,
+                                            fontFamily: 'Mulish',
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                               );

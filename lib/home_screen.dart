@@ -58,6 +58,18 @@ class HomeScreen extends StatelessWidget {
     },
   ];
 
+  Future<void> startNewSession() async {
+    // TODO: Replace the following with actual logic
+    // Example: Delete collections from Firebase
+    // await FirebaseFirestore.instance.collection('FeeStatus').get().then((snapshot) {
+    //   for (var doc in snapshot.docs) {
+    //     doc.reference.delete();
+    //   }
+    // });
+
+    await Future.delayed(const Duration(seconds: 2)); // Simulate delay
+  }
+
   @override
   Widget build(BuildContext context) {
     print("build home");
@@ -80,12 +92,55 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: Icon(
-              Icons.settings_rounded,
-              color: Colors.white,
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              icon: const Icon(Icons.settings_rounded, color: Colors.white),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Start New Session"),
+                    content: const Text(
+                      "Are you sure you want to start a new session? This will delete all data from the previous year.",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop(); // Close the dialog
+
+                          // Optional: show loading dialog
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+
+                          await startNewSession(); // Perform deletion or reset
+
+                          Navigator.of(context).pop(); // Close loading
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text("New session started successfully!"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        },
+                        child: const Text("Confirm"),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           )
         ],

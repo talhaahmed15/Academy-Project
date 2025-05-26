@@ -1,5 +1,6 @@
 import 'package:ahmed_academy/Models/fee_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class FeeDetailCard extends StatelessWidget {
   final FeeModel object;
@@ -9,80 +10,77 @@ class FeeDetailCard extends StatelessWidget {
     required this.object,
   });
 
+  String formatDate(DateTime? date) {
+    if (date == null) return "Date not provided";
+    return DateFormat('dd MMM yyyy').format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Colors.black12),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 4,
-            offset: const Offset(2, 3),
+            offset: const Offset(2, 2),
           ),
         ],
       ),
       child: Column(
-        spacing: 5,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildDetailRow("Name:", object.studentName),
+          const SizedBox(height: 6),
           _buildDetailRow("Class:", object.classNo),
+          const SizedBox(height: 6),
           _buildDetailRow("Amount:", "Rs. ${object.amount}"),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Fees Paid:",
-                style: TextStyle(
-                  // fontWeight: FontWeight.bold,
-                  fontFamily: 'Mulish',
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                object.isFeesPaid ? "Paid" : "Unpaid",
-                style: TextStyle(
-                  fontFamily: 'Mulish',
-                  fontWeight: FontWeight.bold,
-                  color: object.isFeesPaid == false ? Colors.red : Colors.green,
-                ),
-              ),
-            ],
+          const SizedBox(height: 6),
+          _buildDetailRow(
+            "Fees Paid:",
+            object.isFeesPaid ? "Paid" : "Unpaid",
+            valueColor: object.isFeesPaid ? Colors.green : Colors.red,
           ),
+          if (object.isFeesPaid) ...[
+            const SizedBox(height: 6),
+            _buildDetailRow(
+              "Paid On:",
+              formatDate(object.feeDate),
+              valueColor: Colors.black87,
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildDetailRow(String title, String value) {
+  Widget _buildDetailRow(String title, String value, {Color? valueColor}) {
     return Row(
-      // crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
           style: const TextStyle(
-            // fontWeight: FontWeight.bold,
             fontFamily: 'OpenSans',
             fontSize: 14,
             color: Colors.grey,
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontFamily: 'OpenSans',
-            fontSize: 16,
-            color: Colors.black87,
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontFamily: 'OpenSans',
+              fontSize: 15,
+              color: valueColor ?? Colors.black87,
+            ),
           ),
         ),
       ],
